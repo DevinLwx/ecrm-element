@@ -9,41 +9,42 @@ var transitionList = fs.readdirSync(path.resolve(__dirname, '../src/transitions'
 var externals = {};
 
 Object.keys(Components).forEach(function(key) {
-  externals[`element-ui/packages/${key}`] = `element-ui/lib/${key}`;
+    externals[`element-ui/packages/${key}`] = `ecrm-element-ui/lib/${key}`;
 });
 
-externals['element-ui/src/locale'] = 'element-ui/lib/locale';
+externals['element-ui/src/locale'] = 'ecrm-element-ui/lib/locale';
 utilsList.forEach(function(file) {
-  file = path.basename(file, '.js');
-  externals[`element-ui/src/utils/${file}`] = `element-ui/lib/utils/${file}`;
+    file = path.basename(file, '.js');
+    externals[`element-ui/src/utils/${file}`] = `ecrm-element-ui/lib/utils/${file}`;
 });
 mixinsList.forEach(function(file) {
-  file = path.basename(file, '.js');
-  externals[`element-ui/src/mixins/${file}`] = `element-ui/lib/mixins/${file}`;
+    file = path.basename(file, '.js');
+    externals[`element-ui/src/mixins/${file}`] = `ecrm-element-ui/lib/mixins/${file}`;
 });
 transitionList.forEach(function(file) {
-  file = path.basename(file, '.js');
-  externals[`element-ui/src/transitions/${file}`] = `element-ui/lib/transitions/${file}`;
+    file = path.basename(file, '.js');
+    externals[`element-ui/src/transitions/${file}`] = `ecrm-element-ui/lib/transitions/${file}`;
 });
 
 externals = [Object.assign({
-  vue: 'vue'
+    vue: 'vue'
 }, externals), nodeExternals()];
 
 exports.externals = externals;
 
 exports.alias = {
-  main: path.resolve(__dirname, '../src'),
-  packages: path.resolve(__dirname, '../packages'),
-  examples: path.resolve(__dirname, '../examples'),
-  'element-ui': path.resolve(__dirname, '../')
+    main: path.resolve(__dirname, '../src'),
+    packages: path.resolve(__dirname, '../packages'),
+    examples: path.resolve(__dirname, '../examples'),
+    'ecrm-element-ui': path.resolve(__dirname, '../'),
+    'element-ui': path.resolve(__dirname, '../')
 };
 
 exports.vue = {
-  root: 'Vue',
-  commonjs: 'vue',
-  commonjs2: 'vue',
-  amd: 'vue'
+    root: 'Vue',
+    commonjs: 'vue',
+    commonjs2: 'vue',
+    amd: 'vue'
 };
 
 exports.jsexclude = /node_modules|utils\/popper\.js|utils\/date\.js/;
