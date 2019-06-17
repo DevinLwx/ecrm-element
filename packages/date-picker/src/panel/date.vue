@@ -40,6 +40,7 @@
                 ref="timepicker"
                 :time-arrow-control="arrowControl"
                 @pick="handleTimePick"
+                @time-hide="handleTimeHide"
                 :visible="timePickerVisible"
                 @mounted="proxyTimePickerDataProperties">
               </time-picker>
@@ -495,6 +496,12 @@
         return this.selectableRange.length > 0
           ? timeWithinRange(date, this.selectableRange, this.format || 'HH:mm:ss')
           : true;
+      },
+
+      handleTimeHide() {
+        setTimeout(() => {
+          this.timePickerVisible = false;
+        }, 10);
       }
     },
 

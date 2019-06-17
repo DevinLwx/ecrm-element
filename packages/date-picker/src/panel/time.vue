@@ -1,8 +1,8 @@
 <template>
-  <transition name="el-zoom-in-top" @after-leave="$emit('dodestroy')">
+  <transition name="el-zoom-in-top" @after-leave="$emit('dodestroy')">{{visible}}
     <div
       v-show="visible"
-      class="el-time-panel el-popper TEST3"
+      class="el-time-panel el-popper TEST4"
       :class="popperClass">
       <div class="el-time-panel__content" :class="{ 'has-seconds': showSeconds }">
         <time-spinner
@@ -12,14 +12,15 @@
           :show-seconds="showSeconds"
           :am-pm-mode="amPmMode"
           @select-range="setSelectionRange"
+          @select-end="selectEnd()"
           :date="date">
         </time-spinner>
       </div>
       <div class="el-time-panel__footer">
-        <button
-          type="button"
-          class="el-time-panel__btn cancel"
-          @click="handleCancel">{{ t('el.datepicker.cancel') }}</button>
+        <!--<button-->
+          <!--type="button"-->
+          <!--class="el-time-panel__btn cancel"-->
+          <!--@click="handleCancel">{{ t('el.datepicker.cancel') }}</button>-->
         <button
           type="button"
           class="el-time-panel__btn"
@@ -138,6 +139,11 @@
         if (first) return;
         const date = clearMilliseconds(limitTimeRange(this.date, this.selectableRange, this.format));
         this.$emit('pick', date, visible, first);
+      },
+
+      selectEnd() {
+        this.handleConfirm();
+        this.$emit('time-hide', false);
       },
 
       handleKeydown(event) {

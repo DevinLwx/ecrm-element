@@ -1,8 +1,8 @@
 {
   "name": "ecrm-element-ui",
-  "version": "2.9.2",
+  "version": "2.9.4",
   "description": "A Component Library for Vue.js.",
-  "main": "lib/ecrm-element-ui.common.js",
+  "main": "lib/element-ui.common.js",
   "files": [
     "lib",
     "src",

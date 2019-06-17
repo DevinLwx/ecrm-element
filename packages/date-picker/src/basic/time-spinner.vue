@@ -203,6 +203,17 @@
           this.modifyDateField(type, value);
           this.emitSelectRange(type);
           this.adjustSpinner(type, value);
+          this.selectTimeEnd(type);
+        }
+      },
+
+      selectTimeEnd(type) {
+        if (type === 'minutes') {
+          if (!this.showSeconds) {
+            this.$emit('select-end');
+          }
+        } else if (type === 'seconds') {
+          this.$emit('select-end');
         }
       },
 
