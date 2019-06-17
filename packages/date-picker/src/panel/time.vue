@@ -2,7 +2,7 @@
   <transition name="el-zoom-in-top" @after-leave="$emit('dodestroy')">{{visible}}
     <div
       v-show="visible"
-      class="el-time-panel el-popper TEST4"
+      class="el-time-panel el-popper"
       :class="popperClass">
       <div class="el-time-panel__content" :class="{ 'has-seconds': showSeconds }">
         <time-spinner
@@ -11,22 +11,23 @@
           :arrow-control="useArrow"
           :show-seconds="showSeconds"
           :am-pm-mode="amPmMode"
+          :minutes-interval="minutesInterval"
           @select-range="setSelectionRange"
           @select-end="selectEnd()"
           :date="date">
         </time-spinner>
       </div>
-      <div class="el-time-panel__footer">
+      <!--<div class="el-time-panel__footer">-->
         <!--<button-->
           <!--type="button"-->
           <!--class="el-time-panel__btn cancel"-->
           <!--@click="handleCancel">{{ t('el.datepicker.cancel') }}</button>-->
-        <button
-          type="button"
-          class="el-time-panel__btn"
-          :class="{confirm: !disabled}"
-          @click="handleConfirm()">{{ t('el.datepicker.confirm') }}</button>
-      </div>
+        <!--<button-->
+          <!--type="button"-->
+          <!--class="el-time-panel__btn"-->
+          <!--:class="{confirm: !disabled}"-->
+          <!--@click="handleConfirm()">{{ t('el.datepicker.confirm') }}</button>-->
+      <!--</div>-->
     </div>
   </transition>
 </template>
@@ -45,7 +46,8 @@
 
     props: {
       visible: Boolean,
-      timeArrowControl: Boolean
+      timeArrowControl: Boolean,
+      minutesInterval: [String, Number]
     },
 
     watch: {
@@ -65,7 +67,6 @@
         } else if (!newVal) {
           date = this.defaultValue ? new Date(this.defaultValue) : new Date();
         }
-
         this.date = date;
         if (this.visible && this.needInitAdjust) {
           this.$nextTick(_ => this.adjustSpinners());

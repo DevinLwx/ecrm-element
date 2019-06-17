@@ -42,6 +42,7 @@
                 @pick="handleTimePick"
                 @time-hide="handleTimeHide"
                 :visible="timePickerVisible"
+                :minutes-interval="minutesInterval"
                 @mounted="proxyTimePickerDataProperties">
               </time-picker>
             </span>
@@ -370,7 +371,9 @@
         // NOTE: not a permanent solution
         //       consider disable "now" button in the future
         if ((!this.disabledDate || !this.disabledDate(new Date())) && this.checkDateWithinRange(new Date())) {
-          this.date = new Date();
+          const date = new Date();
+          date.setMinutes(date.getMinutes() - Math.floor(date.getMinutes() % this.minutesInterval));
+          this.date = date;
           this.emit(this.date);
         }
       },
@@ -529,7 +532,8 @@
         format: '',
         arrowControl: false,
         userInputDate: null,
-        userInputTime: null
+        userInputTime: null,
+        minutesInterval: 1
       };
     },
 

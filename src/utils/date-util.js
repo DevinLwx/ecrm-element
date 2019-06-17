@@ -146,15 +146,18 @@ export const getMonthDays = (date) => {
   return range(days).map((_, index) => index + 1);
 };
 
-function setRangeData(arr, start, end, value) {
+function setRangeData(arr, start, end, value, interval) {
   for (let i = start; i < end; i++) {
-    arr[i] = value;
+    if (i % interval === 0 || i === 0 || i === end - 1) {
+      arr[i] = value;
+    } else {
+      arr[i] = !value;
+    }
   }
 }
 
-export const getRangeMinutes = function(ranges, hour) {
+export const getRangeMinutes = function(ranges, hour, interval) {
   const minutes = new Array(60);
-
   if (ranges.length > 0) {
     ranges.forEach(range => {
       const start = range[0];
@@ -164,17 +167,17 @@ export const getRangeMinutes = function(ranges, hour) {
       const endHour = end.getHours();
       const endMinute = end.getMinutes();
       if (startHour === hour && endHour !== hour) {
-        setRangeData(minutes, startMinute, 60, true);
+        setRangeData(minutes, startMinute, 60, true, interval);
       } else if (startHour === hour && endHour === hour) {
-        setRangeData(minutes, startMinute, endMinute + 1, true);
+        setRangeData(minutes, startMinute, endMinute + 1, true, interval);
       } else if (startHour !== hour && endHour === hour) {
-        setRangeData(minutes, 0, endMinute + 1, true);
+        setRangeData(minutes, 0, endMinute + 1, true, interval);
       } else if (startHour < hour && endHour > hour) {
-        setRangeData(minutes, 0, 60, true);
+        setRangeData(minutes, 0, 60, true, interval);
       }
     });
   } else {
-    setRangeData(minutes, 0, 60, true);
+    setRangeData(minutes, 0, 60, true, interval);
   }
   return minutes;
 };

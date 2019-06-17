@@ -388,6 +388,10 @@ export default {
     validateEvent: {
       type: Boolean,
       default: true
+    },
+    minutesInterval: {
+      type: [String, Number],
+      default: 1
     }
   },
 
@@ -831,6 +835,7 @@ export default {
       this.picker.selectionMode = this.selectionMode;
       this.picker.unlinkPanels = this.unlinkPanels;
       this.picker.arrowControl = this.arrowControl || this.timeArrowControl || false;
+      this.picker.minutesInterval = this.minutesInterval;
       this.$watch('format', (format) => {
         this.picker.format = format;
       });

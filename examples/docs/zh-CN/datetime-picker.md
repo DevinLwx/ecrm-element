@@ -16,6 +16,7 @@ DateTimePicker 由 DatePicker 和 TimePicker 派生，`Picker Options` 或者其
     <el-date-picker
       v-model="value1"
       type="datetime"
+      minutes-interval=5
       format="yyyy/MM/dd HH:mm"
       value-format="yyyy/MM/dd HH:mm"
       placeholder="选择日期时间">

@@ -30,6 +30,7 @@
           @click="handleClick('minutes', { value: key, disabled: false })"
           v-for="(enabled, key) in minutesList"
           :key="key"
+          v-if="enabled"
           class="el-time-spinner__item"
           :class="{ 'active': key === minutes, disabled: !enabled }">{{ ('0' + key).slice(-2) }}</li>
       </el-scrollbar>
@@ -123,6 +124,10 @@
       amPmMode: {
         type: String,
         default: '' // 'a': am/pm; 'A': AM/PM
+      },
+      minutesInterval: {
+        type: [String, Number],
+        default: 1
       }
     },
 
@@ -140,7 +145,7 @@
         return getRangeHours(this.selectableRange);
       },
       minutesList() {
-        return getRangeMinutes(this.selectableRange, this.hours);
+        return getRangeMinutes(this.selectableRange, this.hours, this.minutesInterval);
       },
       arrowHourList() {
         const hours = this.hours;
@@ -242,8 +247,12 @@
       },
 
       handleScroll(type) {
-        const value = Math.min(Math.floor((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3) / this.typeItemHeight(type)), (type === 'hours' ? 23 : 59));
-        this.modifyDateField(type, value);
+        const value = Math.min(Math.round((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3) / this.typeItemHeight(type)), (type === 'hours' ? 23 : 59));
+        if (type === 'minutes') {
+          this.modifyDateField(type, value * this.minutesInterval >= 59 ? 59 : value * this.minutesInterval);
+        } else {
+          this.modifyDateField(type, value);
+        }
       },
 
       // NOTE: used by datetime / date-range panel
@@ -251,12 +260,16 @@
       //       should try to refactory it
       adjustSpinners() {
         this.adjustSpinner('hours', this.hours);
-        this.adjustSpinner('minutes', this.minutes);
+        this.adjustSpinner('minutes', this.minutes / this.minutesInterval);
         this.adjustSpinner('seconds', this.seconds);
       },
 
       adjustCurrentSpinner(type) {
-        this.adjustSpinner(type, this[type]);
+        let value = this[type];
+        if (type === 'minutes') {
+          value = Math.ceil(this[type] / this.minutesInterval);
+        }
+        this.adjustSpinner(type, value);
       },
 
       adjustSpinner(type, value) {
