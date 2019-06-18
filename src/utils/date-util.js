@@ -148,7 +148,7 @@ export const getMonthDays = (date) => {
 
 function setRangeData(arr, start, end, value, interval) {
   for (let i = start; i < end; i++) {
-    if (i % interval === 0 || i === 0 || i === end - 1) {
+    if (i % interval === 0) {
       arr[i] = value;
     } else {
       arr[i] = !value;

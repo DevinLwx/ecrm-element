@@ -136,7 +136,7 @@
         return this.date.getHours();
       },
       minutes() {
-        return this.date.getMinutes();
+        return this.date.getMinutes() - this.date.getMinutes() % this.minutesInterval;
       },
       seconds() {
         return this.date.getSeconds();
@@ -247,9 +247,9 @@
       },
 
       handleScroll(type) {
-        const value = Math.min(Math.round((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3) / this.typeItemHeight(type)), (type === 'hours' ? 23 : 59));
+        const value = Math.min(Math.floor((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3) / this.typeItemHeight(type)), (type === 'hours' ? 23 : 59));
         if (type === 'minutes') {
-          this.modifyDateField(type, value * this.minutesInterval >= 59 ? 59 : value * this.minutesInterval);
+          this.modifyDateField(type, value * this.minutesInterval);
         } else {
           this.modifyDateField(type, value);
         }

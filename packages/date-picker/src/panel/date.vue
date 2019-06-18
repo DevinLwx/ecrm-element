@@ -562,7 +562,11 @@
         if (this.userInputTime !== null) {
           return this.userInputTime;
         } else {
-          return formatDate(this.value || this.defaultValue, this.timeFormat);
+          const date = this.value || this.defaultValue;
+          if (date) {
+            date.setMinutes(date.getMinutes() - date.getMinutes() % this.minutesInterval);
+          }
+          return formatDate(date, this.timeFormat);
         }
       },
 
