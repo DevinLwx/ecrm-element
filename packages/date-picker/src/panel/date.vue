@@ -205,7 +205,10 @@
       },
 
       timePickerVisible(val) {
-        if (val) this.$nextTick(() => this.$refs.timepicker.adjustSpinners());
+        if (val) {
+          this.getDefaultValue();
+          this.$nextTick(() => this.$refs.timepicker.adjustSpinners());
+        }
       },
 
       selectionMode(newVal) {

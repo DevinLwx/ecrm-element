@@ -11,11 +11,12 @@
         tag="ul"
         ref="hours">
         <li
-          @click="handleClick('hours', { value: hour, disabled: disabled })"
+          @click="handleClick('hours', { value: hour % 24, disabled: disabled })"
           v-for="(disabled, hour) in hoursList"
           class="el-time-spinner__item"
           :key="hour"
-          :class="{ 'active': hour === hours, 'disabled': disabled }">{{ ('0' + (amPmMode ? (hour % 12 || 12) : hour )).slice(-2) }}{{ amPm(hour) }}</li>
+          :class="{ 'active': hour === hours || hour % 24 === hours, 'disabled': disabled }">
+          {{ ('0' + (amPmMode ? (hour % 12 || 12) : hour ) % 24).slice(-2) }}{{ amPm(hour) }}</li>
       </el-scrollbar>
       <el-scrollbar
         @mouseenter.native="emitSelectRange('minutes')"
@@ -27,12 +28,12 @@
         tag="ul"
         ref="minutes">
         <li
-          @click="handleClick('minutes', { value: key, disabled: false })"
+          @click="handleClick('minutes', { value: key % 60, disabled: false })"
           v-for="(enabled, key) in minutesList"
           :key="key"
           v-if="enabled"
           class="el-time-spinner__item"
-          :class="{ 'active': key === minutes, disabled: !enabled }">{{ ('0' + key).slice(-2) }}</li>
+          :class="{ 'active': key === minutes || key % 60 === minutes, disabled: !enabled }">{{ ('0' + key % 60).slice(-2) }}</li>
       </el-scrollbar>
       <el-scrollbar
         v-show="showSeconds"
@@ -45,11 +46,11 @@
         tag="ul"
         ref="seconds">
         <li
-          @click="handleClick('seconds', { value: key, disabled: false })"
-          v-for="(second, key) in 60"
+          @click="handleClick('seconds', { value: key % 60, disabled: false })"
+          v-for="(second, key) in 120"
           class="el-time-spinner__item"
-          :class="{ 'active': key === seconds }"
-          :key="key">{{ ('0' + key).slice(-2) }}</li>
+          :class="{ 'active': key === seconds || key % 60 === seconds}"
+          :key="key">{{ ('0' + key % 60).slice(-2) }}</li>
       </el-scrollbar>
     </template>
     <template v-if="arrowControl">
@@ -61,9 +62,9 @@
         <ul class="el-time-spinner__list" ref="hours">
           <li
             class="el-time-spinner__item"
-            :class="{ 'active': hour === hours, 'disabled': hoursList[hour] }"
+            :class="{ 'active': hour === hours || hour % 24 === hours, 'disabled': hoursList[hour] }"
             v-for="(hour, key) in arrowHourList"
-            :key="key">{{ hour === undefined ? '' : ('0' + (amPmMode ? (hour % 12 || 12) : hour )).slice(-2) + amPm(hour) }}</li>
+            :key="key">{{ hour === undefined ? '' : ('0' + (amPmMode ? (hour % 12 || 12) : hour ) % 24).slice(-2) + amPm(hour) }}</li>
         </ul>
       </div>
       <div
@@ -74,10 +75,10 @@
         <ul class="el-time-spinner__list" ref="minutes">
           <li
             class="el-time-spinner__item"
-            :class="{ 'active': minute === minutes }"
+            :class="{ 'active': minute === minutes || minute % 60 === minutes }"
             v-for="(minute, key) in arrowMinuteList"
             :key="key">
-            {{ minute === undefined ? '' : ('0' + minute).slice(-2) }}
+            {{ minute === undefined ? '' : ('0' + minute % 60).slice(-2) }}
           </li>
         </ul>
       </div>
@@ -91,9 +92,9 @@
           <li
             v-for="(second, key) in arrowSecondList"
             class="el-time-spinner__item"
-            :class="{ 'active': second === seconds }"
+            :class="{ 'active': second === seconds || second % 60 === seconds }"
             :key="key">
-            {{ second === undefined ? '' : ('0' + second).slice(-2) }}
+            {{ second === undefined ? '' : ('0' + second % 60).slice(-2) }}
           </li>
         </ul>
       </div>
@@ -142,41 +143,47 @@
         return this.date.getSeconds();
       },
       hoursList() {
-        return getRangeHours(this.selectableRange);
+        const list = getRangeHours(this.selectableRange);
+        return list.concat(list);
       },
       minutesList() {
-        return getRangeMinutes(this.selectableRange, this.hours, this.minutesInterval);
+        const list = getRangeMinutes(this.selectableRange, this.hours, this.minutesInterval);
+        return list.concat(list);
       },
       arrowHourList() {
         const hours = this.hours;
-        return [
+        const list = [
           hours > 0 ? hours - 1 : undefined,
           hours,
           hours < 23 ? hours + 1 : undefined
         ];
+        return list.concat(list);
       },
       arrowMinuteList() {
         const minutes = this.minutes;
-        return [
+        const list = [
           minutes > 0 ? minutes - 1 : undefined,
           minutes,
           minutes < 59 ? minutes + 1 : undefined
         ];
+        return list.concat(list);
       },
       arrowSecondList() {
         const seconds = this.seconds;
-        return [
+        const list = [
           seconds > 0 ? seconds - 1 : undefined,
           seconds,
           seconds < 59 ? seconds + 1 : undefined
         ];
+        return list.concat(list);
       }
     },
 
     data() {
       return {
         selectableRange: [],
-        currentScrollbar: null
+        currentScrollbar: null,
+        beforeScrollTop: 0
       };
     },
 
@@ -234,24 +241,63 @@
       },
 
       bindScrollEvent() {
-        const bindFuntion = (type) => {
+        const bindFuntion = (type, max) => {
+          this.beforeScrollTop = this.$refs[type].wrap.scrollTop;
           this.$refs[type].wrap.onscroll = (e) => {
+            let scrollType = 'down';
+            if (this.beforeScrollTop > this.$refs[type].wrap.scrollTop) {
+              scrollType = 'up';
+            } else {
+              scrollType = 'down';
+            }
             // TODO: scroll is emitted when set scrollTop programatically
             // should find better solutions in the future!
-            this.handleScroll(type, e);
+            this.handleScroll(type, e, scrollType, max);
           };
         };
-        bindFuntion('hours');
-        bindFuntion('minutes');
-        bindFuntion('seconds');
+        bindFuntion('hours', 23);
+        bindFuntion('minutes', 59);
+        bindFuntion('seconds', 59);
       },
 
-      handleScroll(type) {
-        const value = Math.min(Math.floor((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3) / this.typeItemHeight(type)), (type === 'hours' ? 23 : 59));
-        if (type === 'minutes') {
-          this.modifyDateField(type, value * this.minutesInterval);
+      scrollUpDown(type, scrollType) {
+        if (scrollType === 'down') {
+          this.beforeScrollTop = this.$refs[type].wrap.scrollTop + 1;
         } else {
-          this.modifyDateField(type, value);
+          this.beforeScrollTop = this.$refs[type].wrap.scrollTop - 1;
+        }
+      },
+
+      scrollOperation(type, e, scrollType, max) {
+        const wrap = this.$refs[type].wrap;
+        if (wrap.scrollTop % Math.ceil(wrap.scrollHeight / 2) === 0) { // 滚动一整个块后
+          if (scrollType === 'up' && wrap.scrollTop === 0) { //  || this.beforeScrollTop === 0
+            wrap.scrollTop = (wrap.scrollHeight - this.typeItemHeight(type)) / 2 + 4;
+            this.beforeScrollTop = wrap.scrollTop + 1;
+          }
+          if (scrollType === 'down') {
+            wrap.scrollTop += 4;
+          }
+          this.handleScroll(type, e, scrollType, max);
+        } else {
+          if (this.beforeScrollTop >= wrap.scrollHeight / 2) { // 判断滚动高度,当滚动高度大于area本身的高度时，使其回到原点重新滚动
+            wrap.scrollTop = Math.ceil(this.beforeScrollTop - wrap.scrollHeight / 2);
+          }
+
+          this.scrollUpDown(type, scrollType);
+        }
+      },
+
+      handleScroll(type, e, scrollType, max) {
+        const value = Math.min(Math.floor((this.$refs[type].wrap.scrollTop - (this.scrollBarHeight(type) * 0.5 - 10) / this.typeItemHeight(type) + 3 + 80 + 16) / this.typeItemHeight(type)));
+        this.scrollUpDown(type, scrollType);
+        this.scrollOperation(type, e, scrollType, max);
+        if (type === 'hours') {
+          this.modifyDateField(type, value % (max + 1));
+        } else if (type === 'minutes') {
+          this.modifyDateField(type, value * this.minutesInterval % (max + 1));
+        } else {
+          this.modifyDateField(type, value % (max + 1));
         }
       },
 
@@ -276,7 +322,11 @@
         if (this.arrowControl) return;
         const el = this.$refs[type].wrap;
         if (el) {
-          el.scrollTop = Math.max(0, value * this.typeItemHeight(type));
+          if (value * this.typeItemHeight(type) >= 80) {
+            el.scrollTop = Math.max(0, value * this.typeItemHeight(type) - 80);
+          } else {
+            el.scrollTop = Math.max(0, value * this.typeItemHeight(type) + el.scrollHeight / 2 - 80 - 8);
+          }
         }
       },
 
@@ -321,7 +371,21 @@
       },
       scrollBarHeight(type) {
         return this.$refs[type].$el.offsetHeight;
+      },
+      scrollScrollHeight(type) {
+        return this.$refs[type].wrap.querySelector('ul').offsetHeight;
       }
     }
   };
 </script>
+
+<style lang="scss" scoped>
+  .el-time-spinner {
+    /deep/ .el-time-spinner__list {
+      &:before, &:after {
+        display: none;
+      }
+    }
+  }
+
+</style>
