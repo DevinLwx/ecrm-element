@@ -325,7 +325,7 @@
           if (value * this.typeItemHeight(type) >= 80) {
             el.scrollTop = Math.max(0, value * this.typeItemHeight(type) - 80);
           } else {
-            el.scrollTop = Math.max(0, value * this.typeItemHeight(type) + el.scrollHeight / 2 - 80 - 8);
+            el.scrollTop = Math.max(0, value * this.typeItemHeight(type) + el.scrollHeight / 2 - 80 - 7);
           }
         }
       },
@@ -379,13 +379,15 @@
   };
 </script>
 
-<style lang="scss" scoped>
-  .el-time-spinner {
+<style>
+ /* .el-time-spinner .el-time-spinner__list{
     /deep/ .el-time-spinner__list {
       &:before, &:after {
         display: none;
       }
     }
+  }*/
+  .el-time-spinner .el-time-spinner__list::before, .el-time-spinner .el-time-spinner__list::after {
+    display: none;
   }
-
 </style>
